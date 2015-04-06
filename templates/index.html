@@ -1,13 +1,13 @@
-<html>
-	<head>
-		<title>goblog</title>
-	</head>
+{{define "index"}}
 
-	<body>
-	
-		{{range .}}
-			<h1><a href="{{.Title}}">{{.Title}}</a></h1>
-		{{end}}
+	{{template "header"}}
 
-	</body>
-</html>
+	{{range .}}
+		
+		<h3><a href="{{.TitleLink}}">{{.CreateDateFmt}} {{.Title}}</a></h3>
+			
+	{{end}}
+
+	{{template "footer"}}
+
+{{end}}

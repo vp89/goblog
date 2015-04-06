@@ -1,13 +1,11 @@
-<html>
-	<head>
-		<title>goblog | {{.Title}}</title>
-	</head>
+{{define "post"}}
 
-	<body>
+	{{template "header"}}
 
-		<h1>{{.Title}}</h1>
+	<h1>{{.Title}}</h1>
 
-		<p>{{.Body}}</p>
+	<p>{{.Body}}</p>
 
-	</body>
-</html>
+	{{template "footer"}}
+
+{{end}}
