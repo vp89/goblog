@@ -1,0 +1,51 @@
+{{define "admin"}}
+
+	{{template "header"}}
+
+	<h3>Blog Admin Page</h3>
+
+	<form action="/admin" method="POST" style="width: 80%">
+
+		<div class="form-group">
+			<label for="post-title">Title</label>
+			<input class="form-control" id="post-title" name="post-title">
+		</div>
+
+		<div class="form-group">
+			<label for="post-body">Content</label>
+			<textarea class="form-control" rows="4" id="post-body" name="post-body"></textarea>
+		</div>
+
+		<button type="submit" class="btn btn-default">Submit</button>
+
+	</form>
+
+	<br />
+
+	<table class="table">
+		<tr>
+			<th>ID</th>
+			<th>Title</th>
+			<th>Created</th>
+			<th>Modified</th>
+			<th></th>
+			<th></th>
+		</tr>
+
+	{{range .}}
+		<tr>
+			<td>{{.ID}}</td>
+			<td><a href="/admin/edit/{{.ID}}">{{.Title}}</a></td>
+			<td>{{.CreateDateFmt}}</td>
+			<td>{{.ModifyDateFmt}}</td>
+			<td><a href="/admin/edit/{{.ID}}">Edit</a></td>
+			<td><a href="/admin/delete/{{.ID}}">Delete</a></td>
+			<td><a href="/{{.Title}}">View</a></td>
+		</tr>
+	{{end}}
+	
+	</table>
+
+	{{template "footer"}}
+
+{{end}}
