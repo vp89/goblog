@@ -4,7 +4,7 @@
 
 	<h1>{{.Title}}</h1>
 
-	<p>{{.Body}}</p>
+	<p>{{.Body | markDown }}</p>
 
 	{{template "footer"}}
 

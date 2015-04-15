@@ -7,6 +7,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/microcosm-cc/bluemonday"
+	"github.com/russross/blackfriday"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -39,7 +41,12 @@ type Post struct {
 
 var db *sqlx.DB
 var err error
-var templates = template.Must(template.ParseGlob("templates/*"))
+
+var templateFuncMap = template.FuncMap{
+	"markDown": markDowner,
+}
+
+var templates = template.Must(template.New("").Funcs(templateFuncMap).ParseGlob("templates/*"))
 
 func main() {
 	connectDatabase()
@@ -60,6 +67,12 @@ func main() {
 	post.Methods("GET").HandlerFunc(getPost)
 
 	http.ListenAndServe(":3000", r)
+}
+
+func markDowner(args ...interface{}) template.HTML {
+	s := blackfriday.MarkdownCommon([]byte(fmt.Sprintf("%s", args...)))
+	s = bluemonday.UGCPolicy().SanitizeBytes(s)
+	return template.HTML(s)
 }
 
 // get all post titles from posts table

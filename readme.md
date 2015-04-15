@@ -4,7 +4,7 @@ My first attempt at writing Go code
 
 ### Todo
 
-- [ ] Save posts as Markdown, render to client as HTML
+- [x] Save posts as Markdown, render to client as HTML
 - [ ] Add authentication to admin page
 - [ ] Improve index page layout
 - [ ] Improve post page layout
