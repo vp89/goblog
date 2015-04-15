@@ -10,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday"
+	"gopkg.in/fsnotify.v1"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -56,6 +57,7 @@ var templates = template.Must(template.New("").Funcs(templateFuncMap).ParseGlob(
 func main() {
 	unpackConfig()
 	connectDatabase()
+	go startTemplateRefresher()
 
 	store = *sessions.NewCookieStore([]byte(conf.CookieSecret))
 
@@ -205,4 +207,30 @@ func unpackConfig() {
 	content, _ := ioutil.ReadFile("config.json")
 	err := json.Unmarshal(content, &conf)
 	checkErr(err)
+}
+
+// this allows you to effect UI changes through templates
+// without restarting the app
+func startTemplateRefresher() {
+	watcher, err := fsnotify.NewWatcher()
+	checkErr(err)
+
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case event := <-watcher.Events:
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					templates = template.Must(template.New("").Funcs(templateFuncMap).ParseGlob("templates/*"))
+				}
+			case err := <-watcher.Errors:
+				checkErr(err)
+			}
+		}
+	}()
+
+	err = watcher.Add("templates")
+	checkErr(err)
+
+	<-done
 }
