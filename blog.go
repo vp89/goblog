@@ -65,6 +65,7 @@ func main() {
 	var resourcesPath = flag.String("resources", "resources/", "Path to resources files")
 	r.PathPrefix("/resources/").Handler(http.StripPrefix("/resources/", http.FileServer(http.Dir(*resourcesPath))))
 
+	r.HandleFunc("/admin/new", getAdminNewPost)
 	r.HandleFunc("/admin/delete/{id}", deletePost)
 	r.HandleFunc("/admin/edit/{id}", editPost)
 	r.HandleFunc("/admin", getAdmin)
@@ -143,13 +144,21 @@ func getAdmin(w http.ResponseWriter, r *http.Request) {
 			}
 			_ = templates.ExecuteTemplate(w, "admin", posts)
 			// on POST, insert to database
-		} else {
-			title := r.FormValue("post-title")
-			body := r.FormValue("post-body")
-
-			_, err = db.Exec("insert into posts (title, body, create_date, modify_date) values($1, $2, $3, $4)", title, body, time.Now(), time.Now())
-			checkErr(err)
 		}
+	}
+}
+
+func getAdminNewPost(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		_ = templates.ExecuteTemplate(w, "admin_new", nil)
+		// on POST, insert to database
+	} else {
+		title := r.FormValue("post-title")
+		body := r.FormValue("post-body")
+
+		_, err = db.Exec("insert into posts (title, body, create_date, modify_date) values($1, $2, $3, $4)", title, body, time.Now(), time.Now())
+		checkErr(err)
+		http.Redirect(w, r, "/admin", 301)
 	}
 }
 
