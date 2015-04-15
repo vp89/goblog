@@ -1,0 +1,27 @@
+{{define "admin_login"}}
+
+	{{template "header"}}
+
+	<h3>Blog Admin Page</h3>
+
+	<form action="/admin" method="POST" style="width: 80%">
+
+		<div class="form-group">
+			<label for="login-user">Email</label>
+			<input class="form-control" id="login-user" name="login-user" placeholder="Enter email">
+		</div>
+
+		<div class="form-group">
+			<label for="post-body">Password</label>
+			<input class="form-control" type="password" id="login-password" name="login-password" placeholder="Password">
+		</div>
+
+		<p>
+			<button type="submit" class="btn btn-default">Submit</button>
+		</p>
+
+	</form>
+
+	{{template "footer"}}
+
+{{end}}

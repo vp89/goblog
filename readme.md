@@ -5,7 +5,7 @@ My first attempt at writing Go code
 ### Todo
 
 - [x] Save posts as Markdown, render to client as HTML
-- [ ] Add authentication to admin page
+- [x] Add authentication to admin page
 - [ ] Improve index page layout
 - [ ] Improve post page layout
 - [ ] Don't require restart of the server to effect a template change
