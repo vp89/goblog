@@ -12,7 +12,8 @@ My first attempt at writing Go code
 - [x] Add links to twitter/github/resume etc
 - [x] Split out admin page between post index and add post
 - [x] Add syntax highlighting to post code
-- [ ] Refactor some helper functions to seperate files
+- [x] Refactor some helper functions to seperate files
+- [x] Add live Markdown preview on post edits
 
 ### Usage
 

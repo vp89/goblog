@@ -62,6 +62,7 @@ func main() {
 	var resourcesPath = flag.String("resources", "resources/", "Path to resources files")
 	r.PathPrefix("/resources/").Handler(http.StripPrefix("/resources/", http.FileServer(http.Dir(*resourcesPath))))
 
+	r.HandleFunc("/markdown", getMarkdownPreview)
 	r.HandleFunc("/admin/new", getAdminNewPost)
 	r.HandleFunc("/admin/delete/{id}", deletePost)
 	r.HandleFunc("/admin/edit/{id}", editPost)

@@ -5,6 +5,8 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday"
 	"html/template"
+	"io/ioutil"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -13,6 +15,20 @@ func markDowner(args ...interface{}) template.HTML {
 	s := blackfriday.MarkdownCommon([]byte(fmt.Sprintf("%s", args...)))
 	s = bluemonday.UGCPolicy().SanitizeBytes(s)
 	return template.HTML(s)
+}
+
+func getMarkdownPreview(res http.ResponseWriter, req *http.Request) {
+	md, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		res.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(res, err)
+		return
+	}
+
+	unsafe := blackfriday.MarkdownCommon(md)
+	html := bluemonday.UGCPolicy().SanitizeBytes(unsafe)
+
+	fmt.Fprint(res, string(html))
 }
 
 func titleLinker(args ...interface{}) template.HTML {

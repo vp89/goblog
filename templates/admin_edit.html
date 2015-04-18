@@ -5,22 +5,39 @@
 	<h3>Blog Admin Page</h3>
 	<h4><a href="/admin">Back to Admin page</a></h4>
 
-	<form action="/admin/edit/{{.ID}}" method="POST" style="width: 80%">
+	<div class="container">
+		<div class="row">
+			<form action="/admin/edit/{{.ID}}" method="POST" style="width: 80%">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label for="post-title">Title</label>
+						<input class="form-control" id="post-title" name="post-title" value="{{.Title}}">
+					</div>						
+					<div class="form-group">
+						<label for="post-body">Content</label>
+						<textarea class="form-control" rows="4" id="post-body" name="post-body">{{.Body}}</textarea>
+					</div>
+					
+					<div class="form-group">
+						<button type="submit" class="btn btn-default">Submit</button>
+						<button id="button_preview" class="btn btn-primary">Preview</button>
+					</div>
+					
+				</div>
 
-		<div class="form-group">
-			<label for="post-title">Title</label>
-			<input class="form-control" id="post-title" name="post-title" value="{{.Title}}">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label>Preview</label>
+						<div id="preview"></div>
+					</div>
+				</div>
+
+				
+
+			</form>
 		</div>
-
-		<div class="form-group">
-			<label for="post-body">Content</label>
-			<textarea class="form-control" rows="4" id="post-body" name="post-body">{{.Body}}</textarea>
-		</div>
-
-		<button type="submit" class="btn btn-default">Submit</button>
-
-	</form>
+	</div>
 
 	{{template "footer"}}
-
+	<script src="/resources/js/application.js"></script>
 {{end}}
