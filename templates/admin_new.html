@@ -2,6 +2,12 @@
 
 	{{template "header"}}
 
+	{{range .}}
+		<div class="alert alert-success" role="alert">
+  			{{.}}
+		</div>
+	{{end}}
+
 	<h3>Add new post</h3>
 
 	<p>

@@ -3,13 +3,10 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"github.com/microcosm-cc/bluemonday"
-	"github.com/russross/blackfriday"
 	"gopkg.in/fsnotify.v1"
 	"html/template"
 	"io/ioutil"
@@ -30,16 +27,11 @@ type Config struct {
 
 // Post struct used for blog post result set
 type Post struct {
-	ID    int
-	Title string
-	// formatted with dashes instead of spaces
-	TitleLink  string
+	ID         int
+	Title      string
 	Body       string
 	CreateDate time.Time `db:"create_date"`
-	// formatted for front page
-	CreateDateFmt string
-	ModifyDate    time.Time `db:"modify_date"`
-	ModifyDateFmt string
+	ModifyDate time.Time `db:"modify_date"`
 }
 
 var store sessions.CookieStore
@@ -49,7 +41,9 @@ var err error
 var conf Config
 
 var templateFuncMap = template.FuncMap{
-	"markDown": markDowner,
+	"markDown":   markDowner,
+	"titleLink":  titleLinker,
+	"dateFormat": dateFormatter,
 }
 
 var templates = template.Must(template.New("").Funcs(templateFuncMap).ParseGlob("templates/*"))
@@ -80,25 +74,11 @@ func main() {
 	http.ListenAndServe(":3000", r)
 }
 
-func markDowner(args ...interface{}) template.HTML {
-	s := blackfriday.MarkdownCommon([]byte(fmt.Sprintf("%s", args...)))
-	s = bluemonday.UGCPolicy().SanitizeBytes(s)
-	return template.HTML(s)
-}
-
 // get all post titles from posts table
 func getPostTitles(w http.ResponseWriter, r *http.Request) {
 	// populate array of PostTitle from database query
 	posts := []Post{}
 	_ = db.Select(&posts, "select id, title, create_date, modify_date from posts order by create_date desc")
-
-	// add dashes to post URL
-	for key := range posts {
-		posts[key].TitleLink = strings.Replace(posts[key].Title, " ", "-", -1)
-		posts[key].CreateDateFmt = fmt.Sprintf("%d/%d", posts[key].CreateDate.Month(), posts[key].CreateDate.Day())
-	}
-
-	// write response using template file and array of PostTitle
 	_ = templates.ExecuteTemplate(w, "index", posts)
 }
 
@@ -138,12 +118,6 @@ func getAdmin(w http.ResponseWriter, r *http.Request) {
 			// populate array of PostTitle from database query
 			posts := []Post{}
 			_ = db.Select(&posts, "select id, title, create_date, modify_date from posts order by create_date desc")
-			for key := range posts {
-				cd := posts[key].CreateDate
-				md := posts[key].ModifyDate
-				posts[key].CreateDateFmt = fmt.Sprintf("%d-%02d-%02d %02d:%02d:%02d", cd.Year(), cd.Month(), cd.Day(), cd.Hour(), cd.Minute(), cd.Second())
-				posts[key].ModifyDateFmt = fmt.Sprintf("%d-%02d-%02d %02d:%02d:%02d", md.Year(), md.Month(), md.Day(), md.Hour(), md.Minute(), md.Second())
-			}
 			_ = templates.ExecuteTemplate(w, "admin", posts)
 			// on POST, insert to database
 		}
@@ -157,9 +131,7 @@ func getAdminNewPost(w http.ResponseWriter, r *http.Request) {
 	} else {
 		title := r.FormValue("post-title")
 		body := r.FormValue("post-body")
-
-		_, err = db.Exec("insert into posts (title, body, create_date, modify_date) values($1, $2, $3, $4)", title, body, time.Now(), time.Now())
-		checkErr(err)
+		db.Exec("insert into posts (title, body, create_date, modify_date) values($1, $2, $3, $4)", title, body, time.Now(), time.Now())
 		http.Redirect(w, r, "/admin", 301)
 	}
 }
@@ -180,13 +152,12 @@ func editPost(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			post := Post{}
 			db.Get(&post, "select id, title, body, create_date, modify_date from posts where id = $1", id)
-			_ = templates.ExecuteTemplate(w, "admin_edit", post)
+			templates.ExecuteTemplate(w, "admin_edit", post)
 
 		} else {
 			title := r.FormValue("post-title")
 			body := r.FormValue("post-body")
-			_, err = db.Exec("update posts set title = $1, body = $2, modify_date = $3 where id = $4", title, body, time.Now(), id)
-			checkErr(err)
+			db.Exec("update posts set title = $1, body = $2, modify_date = $3 where id = $4", title, body, time.Now(), id)
 			http.Redirect(w, r, "/admin/edit/"+id, 301)
 		}
 	}

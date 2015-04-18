@@ -6,13 +6,13 @@ My first attempt at writing Go code
 
 - [x] Save posts as Markdown, render to client as HTML
 - [x] Add authentication to admin page
-- [ ] Improve index page layout
-- [ ] Improve post page layout
+- [x] Improve index page layout
+- [x] Improve post page layout
 - [x] Don't require restart of the server to effect a template change
-- [ ] Add links to twitter/github/resume etc
+- [x] Add links to twitter/github/resume etc
 - [x] Split out admin page between post index and add post
 - [x] Add syntax highlighting to post code
-- [ ] Show success/failure on admin page for any insert/edit/delete operations
+- [ ] Refactor some helper functions to seperate files
 
 ### Usage
 

@@ -28,11 +28,11 @@
 		<tr>
 			<td>{{.ID}}</td>
 			<td><a href="/admin/edit/{{.ID}}">{{.Title}}</a></td>
-			<td>{{.CreateDateFmt}}</td>
-			<td>{{.ModifyDateFmt}}</td>
+			<td>{{.CreateDate | dateFormat }}</td>
+			<td>{{.ModifyDate | dateFormat }}</td>
 			<td><a href="/admin/edit/{{.ID}}">Edit</a></td>
 			<td><a href="/admin/delete/{{.ID}}">Delete</a></td>
-			<td><a href="/{{.Title}}">View</a></td>
+			<td><a href="/{{.Title | titleLink }}">View</a></td>
 		</tr>
 	{{end}}
 	

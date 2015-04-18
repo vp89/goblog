@@ -3,8 +3,9 @@
 	{{template "header"}}
 
 	{{range .}}
-		
-		<h3><a href="{{.TitleLink}}">{{.CreateDateFmt}} {{.Title}}</a></h3>
+
+		<h3 class="blog-post-title"><a href="{{.Title | titleLink }}">{{.Title}}</a></h3>
+		<p class="blog-post-meta">{{.CreateDate}}</p>
 			
 	{{end}}
 

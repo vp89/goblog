@@ -2,10 +2,11 @@
 
 	{{template "header"}}
 
-	<h1>{{.Title}}</h1>
+	<h3 class="blog-post-title">{{.Title}}</h3>
+	<p class="blog-post-meta">January 1, 2014</p>
 
 	<p>{{.Body | markDown }}</p>
-
+    
 	{{template "footer"}}
 
 {{end}}
