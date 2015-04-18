@@ -5,7 +5,7 @@
 	{{range .}}
 
 		<h3 class="blog-post-title"><a href="{{.Title | titleLink }}">{{.Title}}</a></h3>
-		<p class="blog-post-meta">{{.CreateDate}}</p>
+		<p class="blog-post-meta">{{.CreateDate | dateFormatNice }}</p>
 			
 	{{end}}
 

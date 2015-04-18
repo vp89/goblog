@@ -20,8 +20,21 @@ func titleLinker(args ...interface{}) template.HTML {
 }
 
 func dateFormatter(args ...interface{}) template.HTML {
+	// just trim the datetime string after the seconds
+	s := fmt.Sprintf("%s", args...)
+	return template.HTML(s[0:strings.Index(s, ".")])
+}
 
-	t, _ := time.Parse("20060102", fmt.Sprintf("%s", args...))
-	fmt.Println(t.String())
-	return template.HTML(t.String())
+func dateFormatterNice(args ...interface{}) template.HTML {
+	// just trim the datetime string after the seconds
+	s := fmt.Sprintf("%s", args...)
+	s = s[0:strings.Index(s, ".")]
+
+	// Go constant Mon Jan 2 15:04:05 MST 2006
+	layoutParse := "2006-01-02 15:04:05"
+	layoutFormat := "01/02/2006"
+	t, _ := time.Parse(layoutParse, s)
+	s2 := t.Format(layoutFormat)
+
+	return template.HTML(s2)
 }

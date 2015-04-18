@@ -41,9 +41,10 @@ var err error
 var conf Config
 
 var templateFuncMap = template.FuncMap{
-	"markDown":   markDowner,
-	"titleLink":  titleLinker,
-	"dateFormat": dateFormatter,
+	"markDown":       markDowner,
+	"titleLink":      titleLinker,
+	"dateFormat":     dateFormatter,
+	"dateFormatNice": dateFormatterNice,
 }
 
 var templates = template.Must(template.New("").Funcs(templateFuncMap).ParseGlob("templates/*"))

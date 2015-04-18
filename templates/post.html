@@ -3,7 +3,7 @@
 	{{template "header"}}
 
 	<h3 class="blog-post-title">{{.Title}}</h3>
-	<p class="blog-post-meta">January 1, 2014</p>
+	<p class="blog-post-meta">{{.CreateDate | dateFormatNice }}</p>
 
 	<p>{{.Body | markDown }}</p>
     
