@@ -80,7 +80,8 @@ func main() {
 func getPostTitles(w http.ResponseWriter, r *http.Request) {
 	// populate array of PostTitle from database query
 	posts := []Post{}
-	_ = db.Select(&posts, "select id, title, create_date, modify_date from posts order by create_date desc")
+	err = db.Select(&posts, "select id, title, create_date, modify_date from posts order by create_date desc")
+	checkErr(err)
 	_ = templates.ExecuteTemplate(w, "index", posts)
 }
 
@@ -177,7 +178,8 @@ func checkErr(err error) {
 }
 
 func unpackConfig() {
-	content, _ := ioutil.ReadFile("config.json")
+	content, err2 := ioutil.ReadFile("config.json")
+	checkErr(err2)
 	err := json.Unmarshal(content, &conf)
 	checkErr(err)
 }
