@@ -82,7 +82,8 @@ func getPostTitles(w http.ResponseWriter, r *http.Request) {
 	posts := []Post{}
 	err = db.Select(&posts, "select id, title, create_date, modify_date from posts order by create_date desc")
 	checkErr(err)
-	_ = templates.ExecuteTemplate(w, "index", posts)
+	err = templates.ExecuteTemplate(w, "index", posts)
+	checkErr(err)
 }
 
 // get a single post and display it
@@ -93,17 +94,21 @@ func getPost(w http.ResponseWriter, r *http.Request) {
 	post := Post{}
 	db.Get(&post, "select id, title, body, create_date, modify_date from posts where title = $1", title)
 
-	_ = templates.ExecuteTemplate(w, "post", post)
+	err = templates.ExecuteTemplate(w, "post", post)
+	checkErr(err)
 }
 
 func authenticateAdmin(w http.ResponseWriter, r *http.Request, session *sessions.Session) {
 	if r.Method == "GET" {
-		_ = templates.ExecuteTemplate(w, "admin_login", nil)
+		err = templates.ExecuteTemplate(w, "admin_login", nil)
+		checkErr(err)
 	} else {
 		user := r.FormValue("login-user")
 		password := r.FormValue("login-password")
-		a, _ := db.Exec("select * from users where user_name = $1 and password = $2", user, password)
-		b, _ := a.RowsAffected()
+		a, err2 := db.Exec("select * from users where user_name = $1 and password = $2", user, password)
+		checkErr(err2)
+		b, err2 := a.RowsAffected()
+		checkErr(err2)
 		if b > 0 {
 			session.Values["logged_in"] = "true"
 			session.Save(r, w)
@@ -120,8 +125,10 @@ func getAdmin(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			// populate array of PostTitle from database query
 			posts := []Post{}
-			_ = db.Select(&posts, "select id, title, create_date, modify_date from posts order by create_date desc")
-			_ = templates.ExecuteTemplate(w, "admin", posts)
+			err = db.Select(&posts, "select id, title, create_date, modify_date from posts order by create_date desc")
+			checkErr(err)
+			err = templates.ExecuteTemplate(w, "admin", posts)
+			checkErr(err)
 			// on POST, insert to database
 		}
 	}
@@ -129,7 +136,8 @@ func getAdmin(w http.ResponseWriter, r *http.Request) {
 
 func getAdminNewPost(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		_ = templates.ExecuteTemplate(w, "admin_new", nil)
+		err = templates.ExecuteTemplate(w, "admin_new", nil)
+		checkErr(err)
 		// on POST, insert to database
 	} else {
 		title := r.FormValue("post-title")
@@ -173,7 +181,7 @@ func connectDatabase() {
 
 func checkErr(err error) {
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 

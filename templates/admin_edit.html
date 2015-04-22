@@ -2,13 +2,23 @@
 
 	{{template "header"}}
 
-	<h3>Blog Admin Page</h3>
+	<h3>Edit post</h3>
 	<h4><a href="/admin">Back to Admin page</a></h4>
+		<form action="/admin/edit/{{.ID}}" method="POST" style="width: 80%">
+			<br />
+			<div class="row">
+				<div class="col-md-12">
+					<div class="form-group">
+						<label>Preview</label>
+						<div id="preview"></div>
+					</div>
+				</div>
+			</div>
 
-	<div class="container">
-		<div class="row">
-			<form action="/admin/edit/{{.ID}}" method="POST" style="width: 80%">
-				<div class="col-md-6">
+			<br />
+
+			<div class="row">
+				<div class="col-md-12">
 					<div class="form-group">
 						<label for="post-title">Title</label>
 						<input class="form-control" id="post-title" name="post-title" value="{{.Title}}">
@@ -24,19 +34,8 @@
 					</div>
 					
 				</div>
-
-				<div class="col-md-6">
-					<div class="form-group">
-						<label>Preview</label>
-						<div id="preview"></div>
-					</div>
-				</div>
-
-				
-
-			</form>
-		</div>
-	</div>
+			</div>
+		</form>
 
 	{{template "footer"}}
 	<script src="/resources/js/application.js"></script>
