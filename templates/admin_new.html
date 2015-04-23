@@ -1,25 +1,15 @@
 {{define "admin_new"}}
 
-	{{template "header"}}
+	{{template "header_admin"}}
 
 	<h3>Add new post</h3>
 	<h4><a href="/admin">Back to Admin page</a></h4>
 
 		<form action="/admin/new" method="POST" style="width: 80%">
 			<br />
-			<div class="row">
-				<div class="col-md-12">
-					<div class="form-group">
-						<label>Preview</label>
-						<div id="preview"></div>
-					</div>
-				</div>
-			</div>
 
-			<br />
-			
 			<div class="row">
-				<div class="col-md-12">
+				<div class="col-md-6">
 					<div class="form-group">
 						<label for="post-title">Title</label>
 						<input class="form-control" id="post-title" name="post-title">
@@ -27,7 +17,7 @@
 
 					<div class="form-group">
 						<label for="post-body">Content</label>
-						<textarea class="form-control" rows="4" id="post-body" name="post-body"></textarea>
+						<textarea class="form-control" rows="25" id="post-body" name="post-body"></textarea>
 					</div>
 
 					<div class="form-group">
@@ -35,6 +25,14 @@
 						<button id="button_preview" class="btn btn-primary">Preview</button>
 					</div>
 				</div>
+
+				<div class="col-md-6">
+					<div class="form-group">
+						<label>Preview</label>
+						<div id="preview" class="well"></div>
+					</div>
+				</div>
+			
 			</div>
 
 		</form>
