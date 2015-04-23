@@ -135,15 +135,20 @@ func getAdmin(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAdminNewPost(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		err = templates.ExecuteTemplate(w, "admin_new", nil)
-		checkErr(err)
-		// on POST, insert to database
+	session, _ := store.Get(r, "blog_admin")
+	if session.Values["logged_in"] == nil {
+		authenticateAdmin(w, r, session)
 	} else {
-		title := r.FormValue("post-title")
-		body := r.FormValue("post-body")
-		db.Exec("insert into posts (title, body, create_date, modify_date) values($1, $2, $3, $4)", title, body, time.Now(), time.Now())
-		http.Redirect(w, r, "/admin", 301)
+		if r.Method == "GET" {
+			err = templates.ExecuteTemplate(w, "admin_new", nil)
+			checkErr(err)
+			// on POST, insert to database
+		} else {
+			title := r.FormValue("post-title")
+			body := r.FormValue("post-body")
+			db.Exec("insert into posts (title, body, create_date, modify_date) values($1, $2, $3, $4)", title, body, time.Now(), time.Now())
+			http.Redirect(w, r, "/admin", 301)
+		}
 	}
 }
 
