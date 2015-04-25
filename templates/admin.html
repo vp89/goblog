@@ -22,14 +22,16 @@
 			<th></th>
 			<th></th>
 			<th></th>
+			<th></th>
 		</tr>
 
 	{{range .}}
-		<tr>
+		<tr class="{{.Draft | draftClass}}">
 			<td>{{.ID}}</td>
 			<td><a href="/admin/edit/{{.ID}}">{{.Title}}</a></td>
 			<td>{{.CreateDate | dateFormat }}</td>
 			<td>{{.ModifyDate | dateFormat }}</td>
+			<td><a href="/{{.Draft | draftText}}/{{.ID}}">{{.Draft | draftText}}</a></td>
 			<td><a href="/admin/edit/{{.ID}}">Edit</a></td>
 			<td><a href="/admin/delete/{{.ID}}">Delete</a></td>
 			<td><a href="/{{.Title | titleLink }}">View</a></td>

@@ -65,3 +65,25 @@ func dateFormatterNice(args ...interface{}) template.HTML {
 
 	return template.HTML(s2)
 }
+
+func draftText(args ...interface{}) template.HTML {
+	s := fmt.Sprint(args...)
+
+	if s == "1" {
+		return template.HTML("Publish")
+	}
+	if s == "0" {
+		return template.HTML("Unpublish")
+	}
+	return template.HTML("")
+}
+
+func draftClass(args ...interface{}) template.HTML {
+	s := fmt.Sprint(args...)
+
+	if s == "1" {
+		return template.HTML("bg-warning")
+	}
+	return template.HTML("")
+
+}
