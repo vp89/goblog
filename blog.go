@@ -3,17 +3,16 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"html/template"
+	"io/ioutil"
+	"log"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"gopkg.in/fsnotify.v1"
-	"html/template"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"strings"
-	"time"
 )
 
 // Config struct used for database connection
@@ -25,16 +24,6 @@ type Config struct {
 	CookieSecret string
 }
 
-// Post struct used for blog post result set
-type Post struct {
-	ID         int
-	Title      string
-	Body       string
-	CreateDate time.Time `db:"create_date"`
-	ModifyDate time.Time `db:"modify_date"`
-	Draft      int       `db:"draft"`
-}
-
 var store sessions.CookieStore
 
 var db *sqlx.DB
@@ -42,12 +31,13 @@ var err error
 var conf Config
 
 var templateFuncMap = template.FuncMap{
-	"markDown":       markDowner,
-	"titleLink":      titleLinker,
-	"dateFormat":     dateFormatter,
-	"dateFormatNice": dateFormatterNice,
-	"draftText":      draftText,
-	"draftClass":     draftClass,
+	"markDown":          markDowner,
+	"titleLink":         titleLinker,
+	"dateFormat":        dateFormatter,
+	"dateFormatNice":    dateFormatterNice,
+	"draftText":         draftText,
+	"draftClass":        draftClass,
+	"dateFormatWorkout": dateFormatterWorkouts,
 }
 
 var templates = template.Must(template.New("").Funcs(templateFuncMap).ParseGlob("templates/*"))
@@ -68,10 +58,12 @@ func main() {
 	r.HandleFunc("/Publish/{id}", publishPost)
 	r.HandleFunc("/Unpublish/{id}", unpublishPost)
 	r.HandleFunc("/markdown", getMarkdownPreview)
+
 	r.HandleFunc("/admin/new", getAdminNewPost)
 	r.HandleFunc("/admin/delete/{id}", deletePost)
 	r.HandleFunc("/admin/edit/{id}", editPost)
 	r.HandleFunc("/admin", getAdmin)
+
 	r.HandleFunc("/", getPostTitles)
 
 	// view a single post by title
@@ -79,143 +71,6 @@ func main() {
 	post.Methods("GET").HandlerFunc(getPost)
 
 	http.ListenAndServe(":3000", r)
-}
-
-// get all post titles from posts table
-func getPostTitles(w http.ResponseWriter, r *http.Request) {
-	// populate array of PostTitle from database query
-	posts := []Post{}
-	err = db.Select(&posts, "select id, title, create_date, modify_date from posts where draft = 0 order by create_date desc")
-	checkErr(err)
-	err = templates.ExecuteTemplate(w, "index", posts)
-	checkErr(err)
-}
-
-// get a single post and display it
-func getPost(w http.ResponseWriter, r *http.Request) {
-	loggedIn := 0
-	session, _ := store.Get(r, "blog_admin")
-
-	if session.Values["logged_in"] != nil {
-		loggedIn = 1
-	}
-
-	title := strings.Replace(mux.Vars(r)["title"], "-", " ", -1)
-
-	post, blankCheck := Post{}, Post{}
-
-	db.Get(&post, "select id, title, body, create_date, modify_date from posts where title = $1 and draft in (0,$2)", title, loggedIn)
-
-	if post == blankCheck {
-		http.Redirect(w, r, "/", 302)
-		return
-	}
-
-	err = templates.ExecuteTemplate(w, "post", post)
-	checkErr(err)
-}
-
-func authenticateAdmin(w http.ResponseWriter, r *http.Request, session *sessions.Session) {
-	if r.Method == "GET" {
-		err = templates.ExecuteTemplate(w, "admin_login", nil)
-		checkErr(err)
-	} else {
-		user := r.FormValue("login-user")
-		password := r.FormValue("login-password")
-		a, err2 := db.Exec("select * from users where user_name = $1 and password = $2", user, password)
-		checkErr(err2)
-		b, err2 := a.RowsAffected()
-		checkErr(err2)
-		if b > 0 {
-			session.Values["logged_in"] = "true"
-			session.Save(r, w)
-			http.Redirect(w, r, "/admin", 302)
-		}
-	}
-}
-
-func getAdmin(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "blog_admin")
-	if session.Values["logged_in"] == nil {
-		authenticateAdmin(w, r, session)
-	} else {
-		if r.Method == "GET" {
-			// populate array of PostTitle from database query
-			posts := []Post{}
-			err = db.Select(&posts, "select id, title, create_date, modify_date, draft from posts order by create_date desc")
-			checkErr(err)
-			err = templates.ExecuteTemplate(w, "admin", posts)
-			checkErr(err)
-			// on POST, insert to database
-		}
-	}
-}
-
-func getAdminNewPost(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "blog_admin")
-	if session.Values["logged_in"] == nil {
-		authenticateAdmin(w, r, session)
-	} else {
-		if r.Method == "GET" {
-			err = templates.ExecuteTemplate(w, "admin_new", nil)
-			checkErr(err)
-			// on POST, insert to database
-		} else {
-			title := r.FormValue("post-title")
-			body := r.FormValue("post-body")
-			db.Exec("insert into posts (title, body, create_date, modify_date, draft) values($1, $2, $3, $4, 1)", title, body, time.Now(), time.Now())
-			http.Redirect(w, r, "/admin", 302)
-		}
-	}
-}
-
-func publishPost(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "blog_admin")
-	if session.Values["logged_in"] == nil {
-		authenticateAdmin(w, r, session)
-	} else {
-		id := mux.Vars(r)["id"]
-		db.Exec("update posts set draft = 0 where id = $1", id)
-		http.Redirect(w, r, "/admin", 302)
-	}
-}
-
-func unpublishPost(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "blog_admin")
-	if session.Values["logged_in"] == nil {
-		authenticateAdmin(w, r, session)
-	} else {
-		id := mux.Vars(r)["id"]
-		db.Exec("update posts set draft = 1 where id = $1", id)
-		http.Redirect(w, r, "/admin", 302)
-	}
-}
-
-func deletePost(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
-	db.Exec("delete from posts where id = $1", id)
-	http.Redirect(w, r, "/admin", 302)
-}
-
-func editPost(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
-
-	session, _ := store.Get(r, "blog_admin")
-	if session.Values["logged_in"] == nil {
-		authenticateAdmin(w, r, session)
-	} else {
-		if r.Method == "GET" {
-			post := Post{}
-			db.Get(&post, "select id, title, body, create_date, modify_date from posts where id = $1", id)
-			templates.ExecuteTemplate(w, "admin_edit", post)
-
-		} else {
-			title := r.FormValue("post-title")
-			body := r.FormValue("post-body")
-			db.Exec("update posts set title = $1, body = $2, modify_date = $3 where id = $4", title, body, time.Now(), id)
-			http.Redirect(w, r, "/admin/edit/"+id, 302)
-		}
-	}
 }
 
 func connectDatabase() {
