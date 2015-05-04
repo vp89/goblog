@@ -17,18 +17,14 @@ import (
 
 // Config struct used for database connection
 type Config struct {
-	Server       string
-	Username     string
-	Password     string
-	Database     string
-	CookieSecret string
+	Server, Username, Password, Database, CookieSecret string
 }
-
-var store sessions.CookieStore
-
-var db *sqlx.DB
-var err error
-var conf Config
+var (
+	store sessions.CookieStore
+	db *sqlx.DB
+	err error
+	conf Config
+)
 
 var templateFuncMap = template.FuncMap{
 	"markDown":          markDowner,

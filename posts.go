@@ -10,12 +10,11 @@ import (
 
 // Post struct used for blog post result set
 type Post struct {
-	ID         int
-	Title      string
-	Body       string
+	ID int
+	Title, Body string
 	CreateDate time.Time `db:"create_date"`
 	ModifyDate time.Time `db:"modify_date"`
-	Draft      int       `db:"draft"`
+	Draft int `db:"draft"`
 }
 
 // get all post titles from posts table
